@@ -1,7 +1,23 @@
 from tkinter import *
+from tkinter import filedialog
 import math
 import time
 import World
+from StartDialog import ParameterInput
+
+class Start:
+	def __init__(self):
+		self.w = w = Tk()
+		Button(w, text="Open Save", command=self.__getFile).pack()
+		Button(w, text="Create New").pack()
+		w.mainloop()
+	
+	def __createNew(self)
+		self.w.destroy()
+		params = ParameterInput()
+	
+	def __getFile(self):
+		diag = filedialog.askopenfilename(filetypes=[('save files', '.save'), ('all files', '.*')])
 
 class gui:
 	def __init__(self, size, world):
@@ -90,8 +106,11 @@ class gui:
 			self.c.create_line(0, p, w, p, width=5)
 
 if __name__ == "__main__":
+	s = Start()
+"""
 	world = World.loadWorld('world.txt')
 	app = gui(700, world)
 	app.placeAgent(5,5)
 	app.moveAgent((-1, 0))
 	app.window.mainloop()
+"""
