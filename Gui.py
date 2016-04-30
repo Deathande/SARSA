@@ -4,41 +4,68 @@ import time
 import World
 
 class gui:
-	def __init__(self, window, size, world):
+	def __init__(self, size, world):
+		self.window = Tk()
+		self.size = size
 		self.grid = world
-		self.c = Canvas(window, width=size, height=size)
+		self.c = Canvas(self.window, width=size, height=size)
 		self.c.pack()
 		self.drawGrid(size, size)
-		p = PhotoImage(file='luke-skywalker.png')
 		for i in range(len(world)):
 			for j in range(len(world[i])):
 				if world[i][j] == -1:
 					self.placePit(size/22,  i, j)
 				elif world[i][j] == 1:
-					p = p.subsample(math.ceil(p.width() / (size / 22)) + 2)
-					diffHeight = abs(p.height() - size / 22) / 2
-					diffWidth = abs(p.width() - size / 22) / 2
-					x = size / 22 * i + diffWidth + (p.width() / 2)
-					y = size / 22 * j + diffHeight + (p.height() / 2)
-					self.c.create_image((x, y), image=p)
+					pass
+					self.placeGold(i, j)
 		self.c.update()
-		window.mainloop()
+		#self.window.mainloop()
 	
-	def placeGold(self, size, y, x):
+	def placeGold(self, x, y):
+		global goldImage
+		goldImage = PhotoImage(file="luke-skywalker.png")
+		goldImage = goldImage.subsample(math.ceil(max(goldImage.height(), goldImage.width()) / (self.size / 22)) + 2)
+		ydiff = abs(goldImage.height() - (self.size / 22)) / 2
+		xdiff = abs(goldImage.width() - (self.size / 22)) / 2
+		x = (self.size / 22) * x + xdiff + (goldImage.width() / 2)
+		y = (self.size / 22) * y + ydiff + (goldImage.height() / 2)
+		self.c.create_image((x, y), image=goldImage)
+	"""
 		newx = size * x + 2
 		newy = size * y + 2
-		self.player = self.c.create_oval(newx, newy, newx+size - 4, newx + size - 4, fill="yellow")
+		self.c.create_rectangle(newx, newy, newx+size - 4, newy+size - 4, fill="gold")
+		"""
 	
-	def placePlayer(self, size, y, x):
-		newx = size * x + 2
-		newy = size * y + 2
-		self.player = self.c.create_oval(newx, newy, newx+size - 4, newy+size - 4, fill="blue", tag='player')
+	def placeAgent(self, x, y):
+		self.c.delete('agent')
+		global agentImage
+		agentImage = PhotoImage(file='Rey.png')
+		agentImage = agentImage.subsample(math.ceil(max(agentImage.height(), agentImage.width()) / (self.size / 22)) + 3)
+		ydiff = abs(agentImage.height() - (self.size / 22)) / 2
+		xdiff = abs(agentImage.width() - (self.size / 22)) / 2
+		x = (self.size / 22) * x + xdiff + (agentImage.width() / 2)
+		y = (self.size / 22) * y + ydiff + (agentImage.height() / 2)
+		self.c.create_image((x, y), image=agentImage, tag='agent')
+		self.c.update()
+		"""
+		newx = (self.size / 22) * x + 2
+		newy = (self.size / 22) * y + 2
+		self.agentPos = (x, y)
+		self.player = self.c.create_oval(newx, newy, newx+self.size/22 - 4, newy+self.size/22 - 4, fill="blue", tag='agent')
+		self.c.update()
+		"""
 	
-	def placePit(self, size, y, x):
+	def placePit(self, size, x, y):
 		newx = size * x + 2
 		newy = size * y + 2
 		self.c.create_rectangle(newx, newy, newx+size - 4, newy+size -4, fill="black")
-
+	
+	def moveAgent(self, pos):
+		x = pos[0] * (self.size / 22)
+		y = pos[1] * (self.size /22)
+		self.c.move('agent', x, y)
+		self.c.update()
+	
 	def drawGrid(self, w, h):
 		# border
 		self.c.create_line(0, 0, 0, h, width=5) # left
@@ -57,7 +84,9 @@ class gui:
 			self.c.create_line(0, p, w, p, width=5)
 
 if __name__ == "__main__":
-	w = Tk()
 	world = World.loadWorld('world.txt')
-	app = gui(w, 800, world)
-	#w.mainloop()
+	app = gui(700, world)
+	app.placeAgent(5,5)
+	time.sleep(4)
+	app.moveAgent((-1, 0))
+	app.window.mainloop()
