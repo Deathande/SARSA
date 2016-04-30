@@ -8,16 +8,20 @@ from StartDialog import ParameterInput
 class Start:
 	def __init__(self):
 		self.w = w = Tk()
+		self.fn = ""
 		Button(w, text="Open Save", command=self.__getFile).pack()
-		Button(w, text="Create New").pack()
+		Button(w, text="Create New", command=self.__createNew).pack()
 		w.mainloop()
 	
-	def __createNew(self)
+	def __createNew(self):
 		self.w.destroy()
 		params = ParameterInput()
+		self.fn = params.fn
 	
 	def __getFile(self):
-		diag = filedialog.askopenfilename(filetypes=[('save files', '.save'), ('all files', '.*')])
+		self.fn = filedialog.askopenfilename(filetypes=[('save files', '.save'), ('all files', '.*')])
+		if self.fn != "":
+			self.w.destroy()
 
 class gui:
 	def __init__(self, size, world):

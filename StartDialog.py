@@ -1,8 +1,11 @@
 from tkinter import *
+from tkinter import filedialog
+import pickle
 
 class ParameterInput:
 	def __init__(self):
 		self.w = w = Tk()
+		self.fn = ""
 		self.inputs = []
 		Label(w, text="Alpha: ").grid(row=0, column=0)
 		self.inputs.append(Entry(w))
@@ -29,7 +32,15 @@ class ParameterInput:
 		except ValueError:
 			Label(self.w, text="Invalid input", fg="red").grid(row=5, column=0)
 			return
-		self.w.destroy()
+
+		params = []
+		for i in self.inputs:
+			params.append(float(i.get()))
+		if self.fn == "":
+			self.fn = filedialog.askopenfilename(filetypes=[('save files', '.save'), ('all files', '.*')])
+		if self.fn != "":
+			pickle.dump(params, open(self.fn, "wb"))
+			self.w.destroy()
 
 if __name__ == "__main__":
 	sd = ParameterInput()
