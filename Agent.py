@@ -6,12 +6,13 @@ import pickle
 import sys
 
 class Agent:
-	def __init__(self, world, gui, fn, alpha, gamma, lamb):
+	def __init__(self, world, gui, fn, alpha, gamma, lamb, ed):
 		self.world = world
 		self.gui = gui
 		self.q_table = []
 		self.epsilon = .9
 		self.fileName = fn
+		self.ed = ed
 		try:
 			self.load(self.fileName)
 			createQ = False
@@ -21,7 +22,7 @@ class Agent:
 		self.gamma = gamma
 		self.alpha = alpha
 		self.lamb = lamb
-		self.action = np.random.randint(0, 3)
+		self.action = np.random.randint(0, 4)
 		self.actions = [np.array([1, 0]),  # move right
                                 np.array([-1, 0]), # move left
                                 np.array([0, -1]), # move down 
@@ -45,11 +46,10 @@ class Agent:
 	def newAction(self):
 		rand = np.random.rand()
 		if rand < self.epsilon:
-			return np.random.randint(0, 3)
+			return np.random.randint(0, 4)
 		maxum = 0
 		index = 0
-		x = self.pos[0]
-		y = self.pos[1]
+		x, y = self.pos
 		for i in range(len(self.q_table[x][y])):
 			if self.q_table[x][y][i] > maxum:
 				maxum = self.q_table[x][y][i]
@@ -58,7 +58,7 @@ class Agent:
 
 	def epsilonDecay(self):
 		if self.epsilon > .1:
-			self.epsilon -= .0001
+			self.epsilon -= self.epsilon * self.ed
 	
 	def restart(self):
 		for i in range(22):
@@ -66,17 +66,21 @@ class Agent:
 				for k in range(4):
 					self.q_table[i][j][k] = np.random.rand() * .1
 					self.e_table[i][j][k] = 0
-		self.action = np.random.randint(0, 3)
-		self.pos = np.array([np.random.randint(1, 20), np.random.randint(1, 20)])
+		self.action = np.random.randint(0, 4)
+		while True:
+			self.pos = np.array([np.random.randint(1, 21), np.random.randint(1, 21)])
+			x,y = self.pos
+			if self.world[x][y] == 0:
+				break
 		self.epsilonDecay()
 		self.gui.placeAgent(self.pos[0], self.pos[1])
 	
 	def takeAction(self):
 		s = self.pos # save the current state
 		self.pos += self.actions[self.action] # update current position, aka get s'
-		self.gui.moveAgent(self.actions[self.action])
+		self.gui.moveAgent(self.actions[self.action]) # update the gui
 		x, y = self.pos
-		r = self.world[x][y] # get the reward of the current state
+		r = self.world[x][y] # get the reward of the new state
 		a = self.newAction() # get a new action from the new state
 		delta = r + self.gamma * self.q_table[x][y][a] - self.q_table[s[0]][s[1]][self.action]
 		self.e_table[s[0]][s[1]][self.action] += 1
