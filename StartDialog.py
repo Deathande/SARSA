@@ -37,7 +37,7 @@ class ParameterInput:
 		for i in self.inputs:
 			params.append(float(i.get()))
 		if self.fn == "":
-			self.fn = filedialog.askopenfilename(filetypes=[('save files', '.save'), ('all files', '.*')])
+			self.fn = filedialog.asksaveasfilename(filetypes=[('save files', '.save'), ('all files', '.*')])
 		if self.fn != "":
 			pickle.dump(params, open(self.fn, "wb"))
 			self.w.destroy()
