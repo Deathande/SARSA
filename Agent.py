@@ -3,27 +3,29 @@ import World
 import Gui
 import time
 import pickle
+import sys
 
 class Agent:
-	def __init__(self, world, gui):
+	def __init__(self, world, gui, fn, alpha, gamma, lamb):
 		self.world = world
 		self.gui = gui
 		self.q_table = []
+		self.epsilon = .9
+		self.fileName = fn
 		try:
-			self.q_table = self.load("qtable.dat")
+			self.load(self.fileName)
 			createQ = False
 		except FileNotFoundError:
 			createQ = True
 		self.e_table = []
-		self.gamma = .5
-		self.alpha = .5
-		self.lamb = .5
+		self.gamma = gamma
+		self.alpha = alpha
+		self.lamb = lamb
 		self.action = np.random.randint(0, 3)
 		self.actions = [np.array([1, 0]),  # move right
                                 np.array([-1, 0]), # move left
                                 np.array([0, -1]), # move down 
                                 np.array([0, 1])]  # move up
-		self.epsilon = .9
 		self.pos = np.array([5, 5])
 		gui.placeAgent(self.pos[0], self.pos[1])
 		for i in range(22):
@@ -53,7 +55,7 @@ class Agent:
 				maxum = self.q_table[x][y][i]
 				index = i
 		return index
-	
+
 	def epsilonDecay(self):
 		if self.epsilon > .1:
 			self.epsilon -= .0001
@@ -84,21 +86,34 @@ class Agent:
 					self.q_table[i][j][k] += self.alpha * delta  * self.e_table[i][j][k]
 					self.e_table[i][j][k] *= self.gamma * self.lamb 
 		self.save()
-		if r == 1 or r == -1:
+		sys.stdout.write("Epsilon: " + str(self.epsilon) + "    \r")
+		if r == -1:
 			self.restart()
-		self. action = a
+		if r == 1:
+			print()
+			print("goal!")
+			self.restart()
+		self.action = a
 		time.sleep(.01)
 	
 	def load(self, fn):
-		return pickle.load(open(fn, "rb"))
+		loaded = pickle.load(open(fn, "rb"))
+		self.epsilon = loaded[0]
+		self.q_table = loaded[1]
 	
 	def save(self):
-		pickle.dump(self.q_table, open("qtable.bin", "wb"))
+		saveList = [self.epsilon, self.q_table]
+		pickle.dump(saveList, open(self.fileName, "wb"))
 
 if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		print("Please specify name of save file")
+		print()
+		exit(1)
+	fn = sys.argv[1]
 	world = World.loadWorld('world.txt')
 	gui = Gui.gui(700, world)
-	p = Agent(world, gui)
+	p = Agent(world,gui, fn, .4, .5, .4) # alpha, gamma, lambda
 	while True:
 		p.takeAction()
 
