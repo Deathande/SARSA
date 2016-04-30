@@ -98,7 +98,7 @@ class Agent:
 			print("goal!")
 			self.restart()
 		self.action = a
-		time.sleep(.01)
+		time.sleep(self.gui.getSpeed())
 	
 	def load(self, fn):
 		loaded = pickle.load(open(fn, "rb"))

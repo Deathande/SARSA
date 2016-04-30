@@ -11,6 +11,9 @@ class gui:
 		self.c = Canvas(self.window, width=size, height=size)
 		self.c.pack()
 		self.drawGrid(size, size)
+		self.scale = Scale(self.window, from_=1, to=100, orient=HORIZONTAL,
+                              length=200)
+		self.scale.pack()
 		for i in range(len(world)):
 			for j in range(len(world[i])):
 				if world[i][j] == -1:
@@ -35,6 +38,9 @@ class gui:
 		newy = size * y + 2
 		self.c.create_rectangle(newx, newy, newx+size - 4, newy+size - 4, fill="gold")
 		"""
+	
+	def getSpeed(self):
+		return 1 / float(self.scale.get())
 	
 	def placeAgent(self, x, y):
 		self.c.delete('agent')
@@ -87,6 +93,6 @@ if __name__ == "__main__":
 	world = World.loadWorld('world.txt')
 	app = gui(700, world)
 	app.placeAgent(5,5)
-	time.sleep(4)
+	#time.sleep(4)
 	app.moveAgent((-1, 0))
 	app.window.mainloop()
