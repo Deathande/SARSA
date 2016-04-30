@@ -1,4 +1,5 @@
 from tkinter import *
+import math
 import time
 import World
 
@@ -8,19 +9,25 @@ class gui:
 		self.c = Canvas(window, width=size, height=size)
 		self.c.pack()
 		self.drawGrid(size, size)
+		p = PhotoImage(file='luke-skywalker.png')
 		for i in range(len(world)):
 			for j in range(len(world[i])):
 				if world[i][j] == -1:
 					self.placePit(size/22,  i, j)
 				elif world[i][j] == 1:
-					self.placeGold(size/22, i, j)
+					p = p.subsample(math.ceil(p.width() / (size / 22)) + 2)
+					diffHeight = abs(p.height() - size / 22) / 2
+					diffWidth = abs(p.width() - size / 22) / 2
+					x = size / 22 * i + diffWidth + (p.width() / 2)
+					y = size / 22 * j + diffHeight + (p.height() / 2)
+					self.c.create_image((x, y), image=p)
 		self.c.update()
 		window.mainloop()
 	
 	def placeGold(self, size, y, x):
 		newx = size * x + 2
 		newy = size * y + 2
-		self.c.create_rectangle(newx, newy, newx+size - 4, newy+size - 4, fill="gold")
+		self.player = self.c.create_oval(newx, newy, newx+size - 4, newx + size - 4, fill="yellow")
 	
 	def placePlayer(self, size, y, x):
 		newx = size * x + 2
@@ -52,5 +59,5 @@ class gui:
 if __name__ == "__main__":
 	w = Tk()
 	world = World.loadWorld('world.txt')
-	app = gui(w, 700, world)
+	app = gui(w, 800, world)
 	#w.mainloop()
