@@ -14,10 +14,11 @@ class Agent:
 		self.fileName = fn
 		self.ed = ed
 		try:
-			self.load(self.fileName)
+			params = self.load(self.fileName)
 			createQ = False
 		except FileNotFoundError:
 			createQ = True
+			self.q_table = []
 		self.e_table = []
 		self.gamma = gamma
 		self.alpha = alpha
@@ -102,11 +103,13 @@ class Agent:
 	
 	def load(self, fn):
 		loaded = pickle.load(open(fn, "rb"))
-		self.epsilon = loaded[0]
-		self.q_table = loaded[1]
+		self.epsilon = loaded[-2]
+		self.q_table = loaded[-1]
+		if isinstance(self.q_table, float):
+			raise FileNotFoundError
 	
 	def save(self):
-		saveList = [self.epsilon, self.q_table]
+		saveList = [self.alpha, self.gamma, self.lamb, self.ed, self.epsilon, self.q_table]
 		pickle.dump(saveList, open(self.fileName, "wb"))
 
 if __name__ == '__main__':
