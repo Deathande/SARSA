@@ -3,9 +3,11 @@ import time
 import World
 
 class gui:
-	def __init__(self, window, size, world):
+	def __init__(self, size, world):
+		self.window = Tk()
+		self.size = size
 		self.grid = world
-		self.c = Canvas(window, width=size, height=size)
+		self.c = Canvas(self.window, width=size, height=size)
 		self.c.pack()
 		self.drawGrid(size, size)
 		for i in range(len(world)):
@@ -15,23 +17,32 @@ class gui:
 				elif world[i][j] == 1:
 					self.placeGold(size/22, i, j)
 		self.c.update()
-		window.mainloop()
+		#self.window.mainloop()
 	
-	def placeGold(self, size, y, x):
+	def placeGold(self, size, x, y):
 		newx = size * x + 2
 		newy = size * y + 2
 		self.c.create_rectangle(newx, newy, newx+size - 4, newy+size - 4, fill="gold")
 	
-	def placePlayer(self, size, y, x):
-		newx = size * x + 2
-		newy = size * y + 2
-		self.player = self.c.create_oval(newx, newy, newx+size - 4, newy+size - 4, fill="blue", tag='player')
+	def placeAgent(self, x, y):
+		self.c.delete('agent')
+		newx = (self.size / 22) * x + 2
+		newy = (self.size / 22) * y + 2
+		self.agentPos = (x, y)
+		self.player = self.c.create_oval(newx, newy, newx+self.size/22 - 4, newy+self.size/22 - 4, fill="blue", tag='agent')
+		self.c.update()
 	
-	def placePit(self, size, y, x):
+	def placePit(self, size, x, y):
 		newx = size * x + 2
 		newy = size * y + 2
 		self.c.create_rectangle(newx, newy, newx+size - 4, newy+size -4, fill="black")
-
+	
+	def moveAgent(self, pos):
+		x = pos[0] * (self.size / 22)
+		y = pos[1] * (self.size /22)
+		self.c.move('agent', x, y)
+		self.c.update()
+	
 	def drawGrid(self, w, h):
 		# border
 		self.c.create_line(0, 0, 0, h, width=5) # left
@@ -50,7 +61,13 @@ class gui:
 			self.c.create_line(0, p, w, p, width=5)
 
 if __name__ == "__main__":
-	w = Tk()
 	world = World.loadWorld('world.txt')
-	app = gui(w, 700, world)
-	#w.mainloop()
+	app = gui(700, world)
+	app.placeAgent(5,5)
+	#app.window.mainloop()
+	#thread.thread.start_new_thread(app.window.mainloop())
+	app.moveAgent((1,0))
+	while True:
+		app.moveAgent((0, 1))
+		time.sleep(1)
+	app.window.mainloop()
