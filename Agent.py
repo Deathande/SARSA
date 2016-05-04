@@ -4,21 +4,16 @@ import Gui
 import time
 import pickle
 import sys
+import curses
 
 class Agent:
-	def __init__(self, world, gui, fn, alpha, gamma, lamb, ed):
+	def __init__(self, world, gui, fn, q_table, e, alpha, gamma, lamb, ed):
 		self.world = world
 		self.gui = gui
-		self.q_table = []
-		self.epsilon = .9
+		self.q_table = q_table
+		self.epsilon = e
 		self.fileName = fn
 		self.ed = ed
-		try:
-			params = self.load(self.fileName)
-			createQ = False
-		except FileNotFoundError:
-			createQ = True
-			self.q_table = []
 		self.e_table = []
 		self.gamma = gamma
 		self.alpha = alpha
@@ -31,18 +26,12 @@ class Agent:
 		self.pos = np.array([5, 5])
 		gui.placeAgent(self.pos[0], self.pos[1])
 		for i in range(22):
-			if createQ:
-				self.q_table.append([])
 			self.e_table.append([])
 			for j in range(22):
-				if createQ:
-					self.q_table[i].append([])
 				self.e_table[i].append([])
 				for k in range(4):
-					if createQ:
-						self.q_table[i][j].append(np.random.rand() * .1)
 					self.e_table[i][j].append(0)
-
+	
 	# Test if we should go where no Agent has gone before
 	def newAction(self):
 		rand = np.random.rand()
@@ -58,14 +47,16 @@ class Agent:
 		return index
 
 	def epsilonDecay(self):
+		# Subtract a percentage from epsilon after a terminal state has been reached
+		# Don't go past .1
 		if self.epsilon > .1:
-			self.epsilon -= self.epsilon * self.ed
+			self.epsilon -= self.ed 
 	
-	def restart(self):
+	def restart(self, dc):
 		for i in range(22):
 			for j in range(22):
 				for k in range(4):
-					self.q_table[i][j][k] = np.random.rand() * .1
+					#self.q_table[i][j][k] = np.random.rand() * .1
 					self.e_table[i][j][k] = 0
 		self.action = np.random.randint(0, 4)
 		while True:
@@ -73,7 +64,8 @@ class Agent:
 			x,y = self.pos
 			if self.world[x][y] == 0:
 				break
-		self.epsilonDecay()
+		if dc:
+			self.epsilonDecay()
 		self.gui.placeAgent(self.pos[0], self.pos[1])
 	
 	def takeAction(self):
@@ -88,16 +80,16 @@ class Agent:
 		for i in range(len(self.q_table)):
 			for j in range(len(self.q_table[i])):
 				for k in range(4):
-					self.q_table[i][j][k] += self.alpha * delta  * self.e_table[i][j][k]
-					self.e_table[i][j][k] *= self.gamma * self.lamb 
+					self.q_table[i][j][k] += (self.alpha * delta  * self.e_table[i][j][k])
+					self.e_table[i][j][k] *= (self.gamma * self.lamb )
 		self.save()
 		sys.stdout.write("Epsilon: " + str(self.epsilon) + "    \r")
 		if r == -1:
-			self.restart()
+			self.restart(False)
 		if r == 1:
-			print()
-			print("goal!")
-			self.restart()
+			#print()
+			#print("goal!")
+			self.restart(True) # Only decay epsilon if the goal state is reached.
 		self.action = a
 		time.sleep(self.gui.getSpeed())
 	
@@ -105,8 +97,6 @@ class Agent:
 		loaded = pickle.load(open(fn, "rb"))
 		self.epsilon = loaded[-2]
 		self.q_table = loaded[-1]
-		if isinstance(self.q_table, float):
-			raise FileNotFoundError
 	
 	def save(self):
 		saveList = [self.alpha, self.gamma, self.lamb, self.ed, self.epsilon, self.q_table]
@@ -114,8 +104,8 @@ class Agent:
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
-		print("Please specify name of save file")
-		print()
+		#print("Please specify name of save file")
+		#print()
 		exit(1)
 	fn = sys.argv[1]
 	world = World.loadWorld('world.txt')
