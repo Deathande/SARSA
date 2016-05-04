@@ -53,7 +53,7 @@ else:
 	fn = gui.fn
 				
 print("here")
-world = World.loadWorld('world.txt')
+world = World.loadWorld('rec/world.txt')
 gui = Gui.gui(1000, world)
 agent = Agent.Agent(world, gui, fn, q_table, e, a, g, l, ed) # alpha, gamma, lambda, Epsilon Decay
 

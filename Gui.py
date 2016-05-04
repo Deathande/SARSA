@@ -3,7 +3,6 @@ from tkinter import filedialog
 import math
 import time
 import World
-from StartDialog import ParameterInput
 import numpy as np
 import pickle
 
@@ -90,7 +89,7 @@ class gui:
 	
 	def placeGold(self, x, y):
 		global goldImage
-		goldImage = PhotoImage(file="goal.png")
+		goldImage = PhotoImage(file="rec/goal.png")
 		goldImage = goldImage.subsample(math.ceil(max(goldImage.height(), goldImage.width()) / (self.size / 22)) + 2)
 		ydiff = abs(goldImage.height() - (self.size / 22)) / 2
 		xdiff = abs(goldImage.width() - (self.size / 22)) / 2
@@ -109,7 +108,7 @@ class gui:
 	def placeAgent(self, x, y):
 		self.c.delete('agent')
 		global agentImage
-		agentImage = PhotoImage(file='Agent.png')
+		agentImage = PhotoImage(file='rec/Agent.png')
 		agentImage = agentImage.subsample(math.ceil(max(agentImage.height(), agentImage.width()) / (self.size / 22)) + 3)
 		ydiff = abs(agentImage.height() - (self.size / 22)) / 2
 		xdiff = abs(agentImage.width() - (self.size / 22)) / 2
